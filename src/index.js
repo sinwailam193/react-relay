@@ -1,13 +1,29 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import './index.css';
-import App from './App';
+
+// APOLLO STUFF
+import { createHttpLink } from 'apollo-link-http';
+import ApolloClient from 'apollo-client';
+import { InMemoryCache } from 'apollo-cache-inmemory';
+import { ApolloProvider } from 'react-apollo';
+
+import './styles/index.css';
+import App from './components/App';
 import * as serviceWorker from './serviceWorker';
 
+const httpLink = createHttpLink({
+  uri: "https://us1.prisma.sh/sin-wai-lam-17a0a8/ApolloTutorial/dev"
+});
+
+const client = new ApolloClient({
+  link: httpLink,
+  cache: new InMemoryCache()
+})
+
 ReactDOM.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
+    <ApolloProvider client={client}>
+      <App />
+    </ApolloProvider>,
   document.getElementById('root')
 );
 
