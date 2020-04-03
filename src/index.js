@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { BrowserRouter } from 'react-router-dom'
 
 // APOLLO STUFF
 import { createHttpLink } from 'apollo-link-http';
@@ -21,9 +22,11 @@ const client = new ApolloClient({
 })
 
 ReactDOM.render(
+  <BrowserRouter>
     <ApolloProvider client={client}>
       <App />
-    </ApolloProvider>,
+    </ApolloProvider>
+  </BrowserRouter>,
   document.getElementById('root')
 );
 

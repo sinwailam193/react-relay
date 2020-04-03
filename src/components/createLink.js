@@ -18,7 +18,8 @@ const CREATE_LINK = gql`
     }
 `;
 
-export default function Createlink() {
+export default function Createlink(props) {
+    const { push } = props.history;
     const [description, setDescription] = useState("");
     const [url, setUrl] = useState("");
 
@@ -43,13 +44,16 @@ export default function Createlink() {
             <Mutation 
                 mutation={CREATE_LINK} 
                 variables={{ description, url}}
+                // add the item into the list
                 update={(cache, { data: { createLink } }) => {
                     const { links } = cache.readQuery({ query: GET_LINKS });
                     cache.writeQuery({
                         query: GET_LINKS,
                         data: { links: links.concat(createLink) }
-                    })
+                    });
                 }}
+                // on complete we route back to the origin page
+                onCompleted={() => push("/")}
             >
                 {createLink => <button onClick={createLink}>Submit</button>}
             </Mutation>
