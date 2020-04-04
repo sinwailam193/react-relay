@@ -5,11 +5,13 @@ import { Query } from "react-apollo";
 import Link from "./link";
 
 export const GET_LINKS = gql`
-    query getLinks {
-        links {
-            id
-            description
-            url
+    query getFeed {
+        feed {
+            links {
+                id
+                description
+                url
+            }
         }
     }
 `;
@@ -19,11 +21,11 @@ export default function Linklist() {
         <Query query={GET_LINKS}>
             {({ loading, error, data }) => {
                 if (loading) {
-                    return <p>Fetchiing...</p>
+                    return <p>Fetching...</p>
                 } else if (error) {
                     return <p>There is an error</p>
                 }
-                return <div>{data.links.map(link => <Link key={link.id} link={link} />)}</div>
+                return <div>{data.feed.links.map(link => <Link key={link.id} link={link} />)}</div>
             }}
         </Query>
     )

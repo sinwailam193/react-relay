@@ -1,7 +1,12 @@
 import React from "react";
 import { Link } from "react-router-dom";
 
-export default function Header() {
+import { AUTH_TOKEN } from "../constants";
+
+export default function Header(props) {
+    const { push } = props.history;
+    const authToken = localStorage.getItem(AUTH_TOKEN)
+
     return (
         <div className="flex pa1 justify-between nowrap orange">
             <div className="flex flex-fixed black">
@@ -9,10 +14,31 @@ export default function Header() {
                 <Link to="/" className="ml1 no-underline black">
                     new
                 </Link>
-                <div className="ml1">|</div>
-                <Link to="/create" className="ml1 no-underline black">
-                    submit
-                </Link>
+                {authToken && (
+                    <div className="flex">
+                        <div className="ml1">|</div>
+                        <Link to="/create" className="ml1 no-underline black">
+                            submit
+                        </Link>
+                    </div>
+                )}
+            </div>
+            <div className="flex flex-fixed">
+                {authToken ? (
+                    <div
+                        className="ml1 pointer black"
+                        onClick={() => {
+                            localStorage.removeItem(AUTH_TOKEN)
+                            push(`/`)
+                        }}
+                    >
+                        logout
+                    </div>
+                ) : (
+                    <Link to="/login" className="ml1 no-underline black">
+                        login
+                    </Link>
+                )}
             </div>
         </div>
     );

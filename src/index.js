@@ -7,27 +7,45 @@ import { createHttpLink } from 'apollo-link-http';
 import ApolloClient from 'apollo-client';
 import { InMemoryCache } from 'apollo-cache-inmemory';
 import { ApolloProvider } from 'react-apollo';
+import { setContext } from "apollo-link-context";
 
-import './styles/index.css';
 import App from './components/App';
+import { AUTH_TOKEN} from "./constants";
 import * as serviceWorker from './serviceWorker';
 
+import './styles/index.css';
+
+/* test account:
+  email: 123@123.com
+  password: 123
+*/
+
+const authLink = setContext((_, { headers }) => {
+    const token = localStorage.getItem(AUTH_TOKEN)
+    return {
+        headers: {
+            ...headers,
+            authorization: token ? `Bearer ${token}` : ''
+        }
+    }
+})
+
 const httpLink = createHttpLink({
-  uri: "https://us1.prisma.sh/sin-wai-lam-17a0a8/ApolloTutorial/dev"
+    uri: "http://localhost:4000",
 });
 
 const client = new ApolloClient({
-  link: httpLink,
-  cache: new InMemoryCache()
+    link: authLink.concat(httpLink),
+    cache: new InMemoryCache()
 })
 
 ReactDOM.render(
-  <BrowserRouter>
-    <ApolloProvider client={client}>
-      <App />
-    </ApolloProvider>
-  </BrowserRouter>,
-  document.getElementById('root')
+    <BrowserRouter>
+        <ApolloProvider client={client}>
+            <App />
+        </ApolloProvider>
+    </BrowserRouter>,
+    document.getElementById('root')
 );
 
 // If you want your app to work offline and load faster, you can change

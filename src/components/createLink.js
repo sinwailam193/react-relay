@@ -5,11 +5,11 @@ import { Mutation } from "react-apollo";
 import { GET_LINKS } from "./linkList";
 
 const CREATE_LINK = gql`
-    mutation createLink($description: String!, $url: String!) {
-        createLink(data:{
+    mutation postFeed($description: String!, $url: String!) {
+        link: post(
             description: $description,
             url: $url
-        }) {
+        ) {
             id
             createdAt
             url
@@ -45,17 +45,22 @@ export default function Createlink(props) {
                 mutation={CREATE_LINK} 
                 variables={{ description, url}}
                 // add the item into the list
-                update={(cache, { data: { createLink } }) => {
-                    const { links } = cache.readQuery({ query: GET_LINKS });
+                update={(cache, { data: { link } }) => {
+                    const { feed, feed: { links } } = cache.readQuery({ query: GET_LINKS });
                     cache.writeQuery({
                         query: GET_LINKS,
-                        data: { links: links.concat(createLink) }
+                        data: {
+                            feed: {
+                                ...feed,
+                                links: links.concat(link)
+                            }
+                        }
                     });
                 }}
                 // on complete we route back to the origin page
                 onCompleted={() => push("/")}
             >
-                {createLink => <button onClick={createLink}>Submit</button>}
+                {postFeed => <button onClick={postFeed}>Submit</button>}
             </Mutation>
         </div>
       )
