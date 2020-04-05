@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import gql from "graphql-tag";
-import { Mutation } from "react-apollo";
+import { useMutation } from '@apollo/react-hooks';
 
 import { GET_LINKS } from "./linkList";
 
@@ -22,6 +22,24 @@ export default function Createlink(props) {
     const { push } = props.history;
     const [description, setDescription] = useState("");
     const [url, setUrl] = useState("");
+    const [postFeed] = useMutation(CREATE_LINK, {
+        variables: { url, description },
+        // on complete we route back to the origin page
+        onCompleted: () => push("/"),
+        // add the item into the list
+        update: (cache, { data: { link } }) => {
+            const { feed, feed: { links } } = cache.readQuery({ query: GET_LINKS });
+            cache.writeQuery({
+                query: GET_LINKS,
+                data: {
+                    feed: {
+                        ...feed,
+                        links: links.concat(link)
+                    }
+                }
+            });
+        }
+    });
 
     return (
         <div>
@@ -41,27 +59,7 @@ export default function Createlink(props) {
                     placeholder="The URL for the link"
                 />
             </div>
-            <Mutation 
-                mutation={CREATE_LINK} 
-                variables={{ description, url}}
-                // add the item into the list
-                update={(cache, { data: { link } }) => {
-                    const { feed, feed: { links } } = cache.readQuery({ query: GET_LINKS });
-                    cache.writeQuery({
-                        query: GET_LINKS,
-                        data: {
-                            feed: {
-                                ...feed,
-                                links: links.concat(link)
-                            }
-                        }
-                    });
-                }}
-                // on complete we route back to the origin page
-                onCompleted={() => push("/")}
-            >
-                {postFeed => <button onClick={postFeed}>Submit</button>}
-            </Mutation>
+            <button onClick={postFeed}>Submit</button>
         </div>
       )
 }

@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import { AUTH_TOKEN } from "../constants";
 import gql from "graphql-tag";
-import { Mutation } from "react-apollo";
+import { useMutation } from "@apollo/react-hooks";
+
+import { AUTH_TOKEN } from "../constants";
 
 const SIGNUP_MUTATION = gql`
     mutation SignupMutation($email: String!, $password: String!, $name: String!) {
@@ -25,6 +26,11 @@ export default function Login(props) {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [name, setName] = useState("");
+    const [mutation] = useMutation(login ? LOGIN_MUTATION : SIGNUP_MUTATION, {
+        onError: error => alert(error.toString()),
+        variables: { email, password, name },
+        onCompleted: data => confirm(data)
+    })
 
     function confirm(data) {
         const { token } = login ? data.login : data.signup;
@@ -62,16 +68,9 @@ export default function Login(props) {
                 />
             </div>
             <div className="flex mt3">
-                <Mutation
-                    onError={error => alert(error.toString())}
-                    mutation={login ? LOGIN_MUTATION : SIGNUP_MUTATION}
-                    variables={{ email, password, name }}
-                    onCompleted={data => confirm(data)}
-                >
-                    {mutation => <div className="pointer mr2 button" onClick={mutation}>
-                        {login ? 'login' : 'create account'}
-                    </div>}
-                </Mutation>
+                <div className="pointer mr2 button" onClick={mutation}>
+                    {login ? 'login' : 'create account'}
+                </div>
                 <div
                     className="pointer button"
                     onClick={() => setLogin(!login)}
