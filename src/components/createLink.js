@@ -14,6 +14,16 @@ const CREATE_LINK = gql`
             createdAt
             url
             description
+            postedBy {
+                id
+                name
+            }
+            votes {
+                id
+                user {
+                    id
+                }
+            }
         }
     }
 `;
