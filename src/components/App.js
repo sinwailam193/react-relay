@@ -5,6 +5,7 @@ import Linklist from "./linkList";
 import CreateLink from "./createLink";
 import Header from "./header";
 import Login from "./login";
+import Search from "./search";
 
 import '../styles/App.css';
 
@@ -17,6 +18,7 @@ function App() {
                     <Route exact path="/" component={Linklist} />
                     <Route exact path="/create" component={CreateLink} />
 					<Route exact path="/login" component={Login} />
+					<Route exact path="/search" component={Search} />
                 </Switch>
             </div>
 		</div>
