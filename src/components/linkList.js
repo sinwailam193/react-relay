@@ -1,8 +1,56 @@
-import React from "react";
+import React, { useEffect } from "react";
 import gql from 'graphql-tag'
 import { useQuery } from "@apollo/react-hooks";
 
 import Link from "./link";
+
+const NEW_VOTES_SUBSCRIPTION = gql`
+    subscription newVoteSubscription {
+        newVote {
+            id
+            link {
+                id
+                url
+                description
+                createdAt
+                postedBy {
+                    id
+                    name
+                }
+                votes {
+                    id
+                    user {
+                        id
+                    }
+                }
+            }
+            user {
+                id
+            }
+        }
+    }
+`;
+
+const NEW_LINKS_SUBSCRIPTION = gql`
+    subscription newLinkSubscription {
+        newLink {
+            id
+            url
+            description
+            createdAt
+            postedBy {
+                id
+                name
+            }
+            votes {
+                id
+                user {
+                    id
+                }
+            }
+        }
+    }
+`;
 
 export const GET_LINKS = gql`
     query getFeed {
@@ -27,8 +75,44 @@ export const GET_LINKS = gql`
     }
 `;
 
+// using subscription
+function subscribeToNewLinks(subscribeToMore) {
+    subscribeToMore({
+        document: NEW_LINKS_SUBSCRIPTION,
+        updateQuery: (prev, { subscriptionData }) => {
+            if (!subscriptionData.data) {
+                return prev;
+            }
+            const newLink = subscriptionData.data.newLink;
+            const exists = prev.feed.links.find(({ id }) => id === newLink.id);
+            if (exists) {
+                return prev;
+            }
+
+            return Object.assign({}, prev, {
+                feed: {
+                    ...prev.feed,
+                    links: [...prev.feed.links, newLink],
+                    count: prev.feed.links.length + 1,
+                }
+            });
+        }
+    });
+}
+
+// using subscription
+function subscribeToNewVotes(subscribeToMore) {
+    subscribeToMore({
+        document: NEW_VOTES_SUBSCRIPTION
+    });
+}
+
 export default function Linklist() {
-    const { loading, error, data } = useQuery(GET_LINKS);
+    const { loading, error, data, subscribeToMore } = useQuery(GET_LINKS);
+    useEffect(() => {
+        subscribeToNewLinks(subscribeToMore);
+        subscribeToNewVotes(subscribeToMore);
+    }, [subscribeToMore]);
 
     function updateVoteStore(cache, vote, id) {
         const { feed, feed: { links } } = cache.readQuery({ query: GET_LINKS });
